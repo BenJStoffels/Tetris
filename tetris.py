@@ -131,7 +131,6 @@ class Player:
         if self.counter == self.dropRate:
             self.drop(b)
 
-        return True
 
     # Nieuwe blok en terug naar boven
     def reset(self, b):

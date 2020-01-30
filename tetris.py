@@ -56,12 +56,12 @@ COLORS = [
 ]
 
 # Grootte van het bord
-field = HEIGHT, WIDTH = (21, 10)
+field = HEIGHT, WIDTH = (20, 10)
 # Maakt een 2d lijst gevuld met 0
 board = np.zeros(field, dtype=int)
 
-SQUARE_SIZE = 20
-window_shape = window_height, window_width = ((HEIGHT + 1) * SQUARE_SIZE, (WIDTH + 2) * SQUARE_SIZE)
+SQUARE_SIZE = 30
+window_shape = window_height, window_width = ((HEIGHT + 1) * SQUARE_SIZE, (WIDTH + 2 + 9) * SQUARE_SIZE)
 
 pygame.display.init()
 screen = pygame.display.set_mode((window_width, window_height))
@@ -73,6 +73,7 @@ class Player:
     def __init__(self, b, level):
         self.level = level
         self.counter = 0
+        self.nextShape = random.choice(SHAPES).copy()
         self.reset(b)
 
     # Zet de huidige blok in het veld
@@ -117,6 +118,7 @@ class Player:
         if self.collides(b):
             self.y -= 1
             self.burn(b)
+            clearLines(b)
             self.reset(b)
 
     # voor naar links en rechts te bewegen
@@ -136,7 +138,8 @@ class Player:
     def reset(self, b):
         self.x = 4
         self.y = 0
-        self.shape = random.choice(SHAPES)
+        self.shape = self.nextShape.copy()
+        self.nextShape = random.choice(SHAPES).copy()
         if self.collides(b):
             # Wanneer de nieuwe blok meteen iets raakt, is het spel gedaan,
             # raise zorgt ervoor dat er een Error komt (zie later)
@@ -172,7 +175,21 @@ class Player:
             "You can't set the dropRate attr, you should change the level instead!")
 
 
+def clearLines(b):
+    lineCount = 0
+    for y, l in enumerate(b):
+        if l.min() != 0:
+            lineCount += 1
+            y_up = y
+            while y_up > 0:
+                b[y_up, :] = b[y_up - 1].copy()
+                y_up -= 1
+            b[0, :] = [0] * WIDTH
+
+
+
 def drawBoard(s, b, player=None):
+    # draw the current playing-field
     print_b = b.copy() # b is het bord zonder de huidige blok
     if player:
         player.burn(print_b) # we zetten de huidige blok in print_b, zonder het huidige veld aan te passen
@@ -184,37 +201,55 @@ def drawBoard(s, b, player=None):
             if e > 0:
                 pygame.draw.rect(s, COLORS[e], ((x + 1) * SQUARE_SIZE, y * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
 
-        pygame.draw.rect(s, COLORS[8], ((window_width - SQUARE_SIZE), y * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
+        pygame.draw.rect(s, COLORS[8], ((WIDTH + 1) * SQUARE_SIZE, y * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
 
-    pygame.draw.rect(s, COLORS[8], (0, window_height - SQUARE_SIZE, window_width, SQUARE_SIZE))
+    pygame.draw.rect(s, COLORS[8], (0, window_height - SQUARE_SIZE, (WIDTH + 2) * SQUARE_SIZE, SQUARE_SIZE))
+
+    # draw the next piece
+    if not player:
+        return
+
+    min_y, min_x = 2 * SQUARE_SIZE, (WIDTH + 3) * SQUARE_SIZE
+    pygame.draw.rect(s, COLORS[8], (min_x, min_y, 7 * SQUARE_SIZE, SQUARE_SIZE))
+    pygame.draw.rect(s, COLORS[8], (min_x, min_y, SQUARE_SIZE, 7 * SQUARE_SIZE))
+    pygame.draw.rect(s, COLORS[8], (min_x + 6 * SQUARE_SIZE, min_y, SQUARE_SIZE, 7 * SQUARE_SIZE))
+    pygame.draw.rect(s, COLORS[8], (min_x, min_y + 6 * SQUARE_SIZE, 7 * SQUARE_SIZE, SQUARE_SIZE))
+    for y, l in enumerate(player.nextShape):
+        for x, e in enumerate(l):
+            if e > 0:
+                pygame.draw.rect(s, COLORS[e], (min_x + (x + 2) * SQUARE_SIZE, min_y + (y + 2) * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
     pygame.display.update()
-        
-    
+            
 
 
-player = Player(board, 1) # we maken een speler
-game_over = True
+player = Player(board, 18) # we maken een speler
+game_over = False
 
-while game_over: # oneindige loop
+while not game_over: # oneindige loop
     for event in pygame.event.get():
         if event.type == pygame.QUIT:  # pylint: disable=E1101
-            game_over = False
+            game_over = True
         if event.type == pygame.KEYDOWN: # pylint: disable=no-member
             if event.key == 276: # Left
                 player.move(-1, board)
             if event.key == 275: # Right
                 player.move(1, board)
-            if event.key == 273: # Up
+            if event.key == 273 or event.key == 113: # Up or A
                 player.rotate(1, board)
+            if event.key == 97: # Q
+                player.rotate(3, board)
             if event.key == 274: # Down
-                player.drop(board)
+                try:
+                    player.drop(board)
+                except StopIteration:
+                    game_over = True
 
     drawBoard(screen, board, player)
 
     try:
         player.next(board)
     except StopIteration:
-        break
+        game_over = True
 
     clock.tick(60)
 

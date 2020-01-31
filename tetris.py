@@ -280,7 +280,7 @@ while not game_over: # oneindige loop
     except StopIteration:
         game_over = True
 
-    clock.tick(30)
+    clock.tick(60)
 
 
 print("Game Over!!") # game over!!!

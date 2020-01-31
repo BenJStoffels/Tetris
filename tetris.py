@@ -64,15 +64,20 @@ SQUARE_SIZE = 30
 window_shape = window_height, window_width = ((HEIGHT + 1) * SQUARE_SIZE, (WIDTH + 2 + 9) * SQUARE_SIZE)
 
 pygame.display.init()
+pygame.font.init()
 screen = pygame.display.set_mode((window_width, window_height))
 pygame.display.set_caption('Tetris')
 clock = pygame.time.Clock()
+font = pygame.font.Font("Redkost Comic.otf", 32)
 
 # Alles wat met de bewegende blok heeft te maken
 class Player:
     def __init__(self, b, level):
         self.level = level
-        self.counter = 0
+        self.lines = 0
+        self.score = 0
+        self.linesUntilNextLevel = min((level + 1) * 10, max(100, level * 10 - 50))
+        self.counter = -100
         self.nextShape = random.choice(SHAPES).copy()
         self.reset(b)
 
@@ -83,6 +88,9 @@ class Player:
             for x in range(min_x, min_x + off_x):
                 if self.shape[y - min_y, x - min_x] != 0:
                     b[y, x] = self.shape[y - min_y, x - min_x]
+
+    def calcScore(self, lines):
+        return [0, 40, 100, 300, 1200][lines] * (self.level + 1)
 
     # Kijkt of de huidige blok iets aanraakt
     def collides(self, b):
@@ -118,7 +126,14 @@ class Player:
         if self.collides(b):
             self.y -= 1
             self.burn(b)
-            clearLines(b)
+            huidige_lines = clearLines(b)
+            self.lines += huidige_lines
+            self.linesUntilNextLevel -= huidige_lines
+            self.score += self.calcScore(huidige_lines)
+
+            if self.linesUntilNextLevel <= 0:
+                self.level += 1
+                self.linesUntilNextLevel = 10
             self.reset(b)
 
     # voor naar links en rechts te bewegen
@@ -186,7 +201,17 @@ def clearLines(b):
                 y_up -= 1
             b[0, :] = [0] * WIDTH
 
+    return lineCount
 
+def displayText(s, string_text, pos, lineHeight):
+    lines = string_text.split("\n")
+    x_pos, y_center = pos
+    y_current = y_center - len(lines) * lineHeight / 2
+    for line in string_text.split("\n"):
+        text = font.render(line, True, (255,255,255))
+        
+        s.blit(text, (x_pos, y_current))
+        y_current += lineHeight
 
 def drawBoard(s, b, player=None):
     # draw the current playing-field
@@ -205,9 +230,13 @@ def drawBoard(s, b, player=None):
 
     pygame.draw.rect(s, COLORS[8], (0, window_height - SQUARE_SIZE, (WIDTH + 2) * SQUARE_SIZE, SQUARE_SIZE))
 
+
     # draw the next piece
     if not player:
         return
+
+    
+    displayText(s, f"Score:\n{player.score:09}\nLines:\n{player.lines:03}\nLevel:\n{player.level:02}", (WIDTH * SQUARE_SIZE +  3.5 * SQUARE_SIZE, 3 * window_height / 4), 34)
 
     min_y, min_x = 2 * SQUARE_SIZE, (WIDTH + 3) * SQUARE_SIZE
     pygame.draw.rect(s, COLORS[8], (min_x, min_y, 7 * SQUARE_SIZE, SQUARE_SIZE))
@@ -222,7 +251,7 @@ def drawBoard(s, b, player=None):
             
 
 
-player = Player(board, 18) # we maken een speler
+player = Player(board, 10) # we maken een speler
 game_over = False
 
 while not game_over: # oneindige loop
@@ -234,9 +263,9 @@ while not game_over: # oneindige loop
                 player.move(-1, board)
             if event.key == 275: # Right
                 player.move(1, board)
-            if event.key == 273 or event.key == 113: # Up or A
+            if event.key == 273 or event.key == 102: # Up or F
                 player.rotate(1, board)
-            if event.key == 97: # Q
+            if event.key == 100: # D
                 player.rotate(3, board)
             if event.key == 274: # Down
                 try:
@@ -251,7 +280,7 @@ while not game_over: # oneindige loop
     except StopIteration:
         game_over = True
 
-    clock.tick(60)
+    clock.tick(30)
 
 
 print("Game Over!!") # game over!!!

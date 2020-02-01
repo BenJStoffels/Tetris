@@ -1,7 +1,5 @@
-import os
 import pygame
 import numpy as np # for 2D fields
-import time
 import random
 
 # Al de vormen
@@ -251,37 +249,41 @@ def drawBoard(s, b, player=None):
             
 
 
-player = Player(board, 10) # we maken een speler
-game_over = False
+def mainGame():
+    player = Player(board, 7) # we maken een speler
+    game_over = False
 
-while not game_over: # oneindige loop
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:  # pylint: disable=E1101
+    while not game_over: # oneindige loop
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:  # pylint: disable=E1101
+                game_over = True
+            if event.type == pygame.KEYDOWN: # pylint: disable=no-member
+                if event.key == 276: # Left
+                    player.move(-1, board)
+                if event.key == 275: # Right
+                    player.move(1, board)
+                if event.key == 273 or event.key == 102: # Up or F
+                    player.rotate(1, board)
+                if event.key == 100: # D
+                    player.rotate(3, board)
+                if event.key == 274: # Down
+                    try:
+                        player.drop(board)
+                    except StopIteration:
+                        game_over = True
+
+        drawBoard(screen, board, player)
+
+        try:
+            player.next(board)
+        except StopIteration:
             game_over = True
-        if event.type == pygame.KEYDOWN: # pylint: disable=no-member
-            if event.key == 276: # Left
-                player.move(-1, board)
-            if event.key == 275: # Right
-                player.move(1, board)
-            if event.key == 273 or event.key == 102: # Up or F
-                player.rotate(1, board)
-            if event.key == 100: # D
-                player.rotate(3, board)
-            if event.key == 274: # Down
-                try:
-                    player.drop(board)
-                except StopIteration:
-                    game_over = True
 
-    drawBoard(screen, board, player)
-
-    try:
-        player.next(board)
-    except StopIteration:
-        game_over = True
-
-    clock.tick(60)
+        clock.tick(60)
 
 
-print("Game Over!!") # game over!!!
+    return player.score, player.lines, player.level
+
+score, lines, level = mainGame()
+print(f"Game over!\nYour score was {score},\nYou cleared {lines} lines and got to level {level}, well played!!")
 pygame.quit() # pylint: disable=no-member

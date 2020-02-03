@@ -314,7 +314,7 @@ def mainGame():
                 game_over = True
 
         clock.tick(60)
-        print(player.das_counter)
+
 
 
     return player.score, player.lines, player.level

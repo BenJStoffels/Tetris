@@ -6,32 +6,30 @@ import random
 SHAPES = [
     np.array([
         [1, 1, 0],
-        [0, 1, 1],
-        [0, 0, 0]
+        [0, 1, 1]
     ]),
     np.array([
         [0, 2, 2],
-        [2, 2, 0],
-        [0, 0, 0]
+        [2, 2, 0]
     ]),
     np.array([
         [3, 3],
         [3, 3]
     ]),
     np.array([
-        [0, 4, 0],
+        [0, 0, 0],
         [4, 4, 4],
-        [0, 0, 0]
+        [0, 4, 0]
     ]),
     np.array([
-        [0, 0, 5],
+        [0, 0, 0],
         [5, 5, 5],
-        [0, 0, 0]
+        [0, 0, 5]
     ]),
     np.array([
-        [6, 0, 0],
+        [0, 0, 0],
         [6, 6, 6],
-        [0, 0, 0]
+        [6, 0, 0]
     ]),
     np.array([
         [0, 0, 0, 0],
@@ -76,6 +74,9 @@ class Player:
         self.score = 0
         self.linesUntilNextLevel = min((level + 1) * 10, max(100, level * 10 - 50))
         self.counter = -100
+        self.pause_counter = 0
+        self.das_counter = -1
+        self.previous_direction = 0
         self.nextShape = random.choice(SHAPES).copy()
         self.reset(b)
 
@@ -124,6 +125,7 @@ class Player:
         if self.collides(b):
             self.y -= 1
             self.burn(b)
+            self.pause_counter = 1
             huidige_lines = clearLines(b)
             self.lines += huidige_lines
             self.linesUntilNextLevel -= huidige_lines
@@ -136,8 +138,18 @@ class Player:
 
     # voor naar links en rechts te bewegen
     def move(self, d, b):
+        if self.das_counter != -1 and self.das_counter != 16:
+            self.das_counter += 1
+            return
+        if self.das_counter == -1:
+            self.das_counter = 0
+            
+        if self.das_counter == 16:
+            self.das_counter = 10
+
         self.x += d
         if self.collides(b):
+            self.das_counter = 16
             self.x -= d
 
     def next(self, b):
@@ -179,13 +191,29 @@ class Player:
 
     @property
     def dropRate(self):
-        return [48, 43, 38, 33, 28, 23, 18, 13, 8, 6, 5, 5, 5, 4, 4, 4, 3, 3, 3, 2, 2, 2, 2,2,2,2,2,2,1][self.level % 30]
+        return [48, 43, 38, 33, 28, 23, 18, 13, 8, 6, 5, 5, 5, 4, 4, 4, 3, 3, 3, 2, 2, 2, 2,2,2,2,2,2,2,1][self.level % 30]
 
     # Niet belangrijk
     @dropRate.setter
     def set_dropRate(self, val):
         raise PermissionError(
             "You can't set the dropRate attr, you should change the level instead!")
+
+    @property
+    def pause(self):
+        if not self.pause_counter == 0:
+            self.pause_counter += 1
+            if self.pause_counter >= 10:
+                self.pause_counter = 0
+            return True
+
+        return False
+
+    @pause.setter
+    def set_pause(self, val):
+        raise PermissionError(
+            "You can't set the pause attr, you should change the pause_counter instead!")
+        
 
 
 def clearLines(b):
@@ -250,36 +278,43 @@ def drawBoard(s, b, player=None):
 
 
 def mainGame():
-    player = Player(board, 7) # we maken een speler
+    player = Player(board, 1) # we maken een speler
     game_over = False
 
     while not game_over: # oneindige loop
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:  # pylint: disable=E1101
+        if not player.pause:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:  # pylint: disable=E1101
+                    game_over = True
+                if event.type == pygame.KEYDOWN: # pylint: disable=no-member
+                    if event.key == 273 or event.key == 102: # Up or F
+                        player.rotate(3, board)
+                    if event.key == 100: # D
+                        player.rotate(1, board)
+                    if event.key == 276 or event.key == 275:
+                        player.das_counter = -1
+
+
+            keys_pressed = pygame.key.get_pressed()
+            if keys_pressed[276]:
+                player.move(-1, board)
+            if keys_pressed[275]:
+                player.move(1, board)
+            if keys_pressed[274]:
+                try:
+                    player.drop(board)
+                except StopIteration:
+                    game_over = True
+
+            drawBoard(screen, board, player)
+
+            try:
+                player.next(board)
+            except StopIteration:
                 game_over = True
-            if event.type == pygame.KEYDOWN: # pylint: disable=no-member
-                if event.key == 276: # Left
-                    player.move(-1, board)
-                if event.key == 275: # Right
-                    player.move(1, board)
-                if event.key == 273 or event.key == 102: # Up or F
-                    player.rotate(1, board)
-                if event.key == 100: # D
-                    player.rotate(3, board)
-                if event.key == 274: # Down
-                    try:
-                        player.drop(board)
-                    except StopIteration:
-                        game_over = True
-
-        drawBoard(screen, board, player)
-
-        try:
-            player.next(board)
-        except StopIteration:
-            game_over = True
 
         clock.tick(60)
+        print(player.das_counter)
 
 
     return player.score, player.lines, player.level

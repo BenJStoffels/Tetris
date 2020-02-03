@@ -1,0 +1,7 @@
+﻿Todo Tetris:
+* Menu maken
+-level selecteren
+-na game over terug naar menu (ipv afsluiten)
+* Harddrop (SPACE)
+* Lang ingeduwd houden
+* ...

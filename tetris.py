@@ -57,28 +57,62 @@ field = HEIGHT, WIDTH = (20, 10)
 board = np.zeros(field, dtype=int)
 
 SQUARE_SIZE = 30
-window_shape = window_height, window_width = ((HEIGHT + 1) * SQUARE_SIZE, (WIDTH + 2 + 9) * SQUARE_SIZE)
+window_shape = window_width, window_height = ((WIDTH + 2 + 9) * SQUARE_SIZE, (HEIGHT + 1) * SQUARE_SIZE)
 
 pygame.display.init()
 pygame.font.init()
-screen = pygame.display.set_mode((window_width, window_height))
+screen = pygame.display.set_mode(window_shape)
 pygame.display.set_caption('Tetris')
 clock = pygame.time.Clock()
 font = pygame.font.Font("Redkost Comic.otf", 32)
 
+
+def das(delay, speed):
+    counter = delay
+    charged = False
+    def inner(set_counter=None):
+        nonlocal counter, charged
+        if set_counter is not None:
+            counter = set_counter
+            return
+        if counter == 16:
+            counter = [0, delay-speed][charged]
+            charged = True
+            return True
+        
+        counter += 1
+        return False
+
+    return inner
+
+def drop(delay, first=False):
+    counter = 0
+    if first:
+        counter = -100
+    def inner(increment=1):
+        nonlocal counter
+        if counter >= delay:
+            counter = 0
+            return True
+        counter += increment
+        return False
+
+    return inner
+
 # Alles wat met de bewegende blok heeft te maken
 class Player:
     def __init__(self, b, level):
+        self.x = 4
+        self.y = 0
+        self.nextShape = random.choice(SHAPES).copy()
+        self.shape = random.choice(SHAPES).copy()
         self.level = level
         self.lines = 0
         self.score = 0
         self.linesUntilNextLevel = min((level + 1) * 10, max(100, level * 10 - 50))
-        self.counter = -100
         self.pause_counter = 0
-        self.das_counter = -1
-        self.previous_direction = 0
-        self.nextShape = random.choice(SHAPES).copy()
-        self.reset(b)
+        self.das = das(16, 6)
+        self.drop_ftie = drop(self.dropRate, True)
 
     # Zet de huidige blok in het veld
     def burn(self, b):
@@ -121,46 +155,38 @@ class Player:
     # Beweegt de blok omlaag en kijkt of de blok helemaal beneden is
     def drop(self, b):
         self.y += 1
-        self.counter = 0
         if self.collides(b):
             self.y -= 1
-            self.burn(b)
-            self.pause_counter = 1
-            huidige_lines = clearLines(b)
-            self.lines += huidige_lines
-            self.linesUntilNextLevel -= huidige_lines
-            self.score += self.calcScore(huidige_lines)
-
-            if self.linesUntilNextLevel <= 0:
-                self.level += 1
-                self.linesUntilNextLevel = 10
             self.reset(b)
 
     # voor naar links en rechts te bewegen
     def move(self, d, b):
-        if self.das_counter != -1 and self.das_counter != 16:
-            self.das_counter += 1
-            return
-        if self.das_counter == -1:
-            self.das_counter = 0
-            
-        if self.das_counter == 16:
-            self.das_counter = 10
-
-        self.x += d
-        if self.collides(b):
-            self.das_counter = 16
-            self.x -= d
+        if self.das():
+            self.x += d
+            if self.collides(b):
+                self.das(set_counter=16)
+                self.x -= d
 
     def next(self, b):
-        self.counter += 1
         
-        if self.counter == self.dropRate:
+        if self.drop_ftie():
             self.drop(b)
 
 
     # Nieuwe blok en terug naar boven
     def reset(self, b):
+        self.burn(b)
+        self.pause_counter = 1
+        huidige_lines = clearLines(b)
+        self.lines += huidige_lines
+        self.linesUntilNextLevel -= huidige_lines
+        self.score += self.calcScore(huidige_lines)
+
+        if self.linesUntilNextLevel <= 0:
+            self.level += 1
+            self.drop_ftie = drop(self.dropRate)
+            self.linesUntilNextLevel = 10
+
         self.x = 4
         self.y = 0
         self.shape = self.nextShape.copy()
@@ -292,7 +318,7 @@ def mainGame():
                     if event.key == 100: # D
                         player.rotate(1, board)
                     if event.key == 276 or event.key == 275:
-                        player.das_counter = -1
+                        player.das = das(16, 6)
 
 
             keys_pressed = pygame.key.get_pressed()
@@ -302,7 +328,7 @@ def mainGame():
                 player.move(1, board)
             if keys_pressed[274]:
                 try:
-                    player.drop(board)
+                    player.drop_ftie(2)
                 except StopIteration:
                     game_over = True
 

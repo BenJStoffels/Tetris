@@ -5,4 +5,7 @@
 -Highscores ??? (opslaan in apart bestand, kan Yarno zijn scores bij mij toevoegen? server?)
 * Harddrop (SPACE)
 * Lang ingeduwd houden
+* Soft drop
+* Lineclear animation
+* Playerdrop animation
 * ...

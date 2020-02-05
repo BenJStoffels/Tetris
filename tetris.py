@@ -29,7 +29,8 @@ def mainGame():
                 player.move(1, board)
             if keys_pressed[274]:
                 try:
-                    player.drop_ftie(2)
+                    if player.drop_ftie(2):
+                        player.drop(board)
                 except StopIteration:
                     game_over = True
 

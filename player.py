@@ -9,6 +9,8 @@ class Player:
         self.y = 0
         self.nextShape = random.choice(SHAPES).copy()
         self.shape = random.choice(SHAPES).copy()
+        while self.shape[-self.y, :].max() == 0:
+            self.y -= 1
         self.level = level
         self.lines = 0
         self.score = 0
@@ -101,6 +103,8 @@ class Player:
         self.y = 0
         self.shape = self.nextShape.copy()
         self.nextShape = random.choice(SHAPES).copy()
+        while self.shape[-self.y, :].max() == 0:
+            self.y -= 1
         if self.collides(b):
             # Wanneer de nieuwe blok meteen iets raakt, is het spel gedaan,
             # raise zorgt ervoor dat er een Error komt (zie later)

@@ -89,7 +89,6 @@ def pause(delay):
             return True
 
         counter += 1
-        print(counter)
         return False
 
     return inner

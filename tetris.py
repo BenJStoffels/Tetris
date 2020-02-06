@@ -5,12 +5,16 @@ from helper import das, drawBoard
 from init import board, screen, clock
 
 
-def mainGame():
-    player = Player(board, 9)  # we maken een speler
+def mainGame(level):
+    player = Player(board, level)  # we maken een speler
     game_over = False
 
     while not game_over:  # oneindige loop
+        for animation in player.animations:
+            animation(screen)
+
         if player.pause_ftie == None:
+            player.animations.clear()
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:  # pylint: disable=E1101
                     game_over = True
@@ -44,12 +48,21 @@ def mainGame():
         else:
             if player.pause_ftie():
                 player.pause_ftie = None
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:  # pylint: disable=E1101
+                    game_over = True
+
         clock.tick(60)
 
     return player.score, player.lines, player.level
 
 
-score, lines, level = mainGame()
+def menu():
+    pass
+
+
+score, lines, level = mainGame(5)
 print(
     f"Game over!\nYour score was {score},\nYou cleared {lines} lines and got to level {level}, well played!!")
 pygame.quit()  # pylint: disable=no-member

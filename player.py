@@ -1,5 +1,5 @@
 import random
-from helper import SHAPES, das, drop, pause, clearLines
+from helper import SHAPES, das, drop, pause, clearLines, createBlockdropAnimation
 from init import HEIGHT, WIDTH
 import numpy as np
 
@@ -18,6 +18,7 @@ class Player:
         self.pause_ftie = None
         self.das = das(16, 6)
         self.drop_ftie = drop(self.dropRate, True)
+        self.animations = []
 
     # Zet de huidige blok in het veld
     def burn(self, b):
@@ -29,7 +30,7 @@ class Player:
 
     def calcDelay(self, lines):
         y = self.y + self.shape.shape[0]
-        delay = 2 * ((21 - y) // 4) + 10
+        delay = 2 * ((21 - y) // 4) + 100
         if lines:
             delay += 20
         return delay
@@ -76,7 +77,7 @@ class Player:
         if self.das():
             self.x += d
             if self.collides(b):
-                self.das(set_counter=16)
+                self.das(True)
                 self.x -= d
 
     def next(self, b):
@@ -93,6 +94,8 @@ class Player:
         self.linesUntilNextLevel -= huidige_lines
         self.score += self.calcScore(huidige_lines)
         self.pause_ftie = pause(self.calcDelay(huidige_lines != 0))
+
+        self.animations.append(createBlockdropAnimation({"x": self.x, "y": self.y, "shape": self.shape.copy()}))
 
         if self.linesUntilNextLevel <= 0:
             self.level += 1

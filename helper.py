@@ -49,14 +49,37 @@ COLORS = [
     (0, 0, 139),
 ]
 
+def createBlockdropAnimation(player):
+    counter = 0
+    white = False
+    def inner(s):
+        nonlocal counter, white
+        if counter % 4 == 0:
+            white = not white
+
+        for y, l in enumerate(player["shape"]):
+        
+            for x, e in enumerate(l):
+                if e > 0:
+                    pygame.draw.rect(s, COLORS[e] if not white else (255,255,255), ((player["x"] + x + 1) * SQUARE_SIZE, (player["y"] + y) * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
+
+        pygame.display.update()
+        counter += 1
+
+    return inner
+        
+
 def das(delay, speed):
     counter = delay
     charged = False
-    def inner(set_counter=None):
+    print("das reset!")
+    def inner(charge=False):
         nonlocal counter, charged
-        if set_counter is not None:
-            counter = set_counter
+        if charge:
+            counter = delay
+            charged = True
             return
+
         if counter == 16:
             counter = [0, delay-speed][charged]
             charged = True

@@ -25,7 +25,7 @@ class Player:
         min_y, min_x, off_y, off_x = self.rect
         for y in range(min_y, min_y + off_y):
             for x in range(min_x, min_x + off_x):
-                if self.shape[y - min_y, x - min_x] != 0:
+                if self.shape[y - min_y, x - min_x] != 0 and y >= 0:
                     b[y, x] = self.shape[y - min_y, x - min_x]
 
     def calcDelay(self, lines):
@@ -48,8 +48,6 @@ class Player:
                     return True
                 continue
             if y < 0:
-                if self.shape[y-min_y, :].max() > 0:
-                    return True
                 continue
             
             for x in range(min_x, min_x+off_x):

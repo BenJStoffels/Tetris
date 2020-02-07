@@ -1,11 +1,13 @@
 import pygame
 import numpy as np  # for 2D fields
 from player import Player
-from helper import das, drawBoard
-from init import board, screen, clock
+from helper import das, drawBoard, drawMenu
+from init import screen, clock, field
 
 
 def mainGame(level):
+    # Maakt een 2d lijst gevuld met 0
+    board = np.zeros(field, dtype=int)
     player = Player(board, level)  # we maken een speler
     game_over = False
 
@@ -59,10 +61,26 @@ def mainGame(level):
 
 
 def menu():
-    pass
+    quit_bool = False
+    button_clicked = False
+    prev_score = ""
+    while not quit_bool:
+        if button_clicked:
+            button_clicked = False
+            score, lines, level = mainGame(15)
+
+            prev_score = f"Game over!\nYour score was {score},\nYou cleared {lines} lines and\ngot to level {level},\nwell played!!"
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:  # pylint: disable=E1101
+                quit_bool = True
+
+        def action():
+            nonlocal button_clicked
+            button_clicked = True
+
+        drawMenu(screen, prev_score, action)
 
 
-score, lines, level = mainGame(5)
-print(
-    f"Game over!\nYour score was {score},\nYou cleared {lines} lines and got to level {level}, well played!!")
+menu()
 pygame.quit()  # pylint: disable=no-member

@@ -3,8 +3,7 @@ import numpy as np
 
 # Grootte van het bord
 field = HEIGHT, WIDTH = (20, 10)
-# Maakt een 2d lijst gevuld met 0
-board = np.zeros(field, dtype=int)
+
 
 SQUARE_SIZE = 30
 window_shape = window_width, window_height = (

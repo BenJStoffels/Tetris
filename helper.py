@@ -72,7 +72,6 @@ def createBlockdropAnimation(player):
 def das(delay, speed):
     counter = delay
     charged = False
-    print("das reset!")
     def inner(charge=False):
         nonlocal counter, charged
         if charge:
@@ -129,14 +128,15 @@ def clearLines(b):
 
     return lineCount
 
-def displayText(s, string_text, pos, lineHeight):
+def displayText(s, string_text, pos, color=(255,255,255), center=False):
     lines = string_text.split("\n")
-    x_pos, y_center = pos
+    x_center, y_center = pos
+    lineHeight = font.size(string_text)[1]
     y_current = y_center - len(lines) * lineHeight / 2
     for line in string_text.split("\n"):
-        text = font.render(line, True, (255,255,255))
+        text = font.render(line, True, color)
         
-        s.blit(text, (x_pos, y_current))
+        s.blit(text, (x_center - center * text.get_width() / 2, y_current))
         y_current += lineHeight
 
 def drawBoard(s, b, player=None):
@@ -162,7 +162,7 @@ def drawBoard(s, b, player=None):
         return
 
     
-    displayText(s, f"Score:\n{player.score:09}\nLines:\n{player.lines:03}\nLevel:\n{player.level:02}", (WIDTH * SQUARE_SIZE +  3.5 * SQUARE_SIZE, 3 * window_height / 4), 34)
+    displayText(s, f"Score:\n{player.score:09}\nLines:\n{player.lines:03}\nLevel:\n{player.level:02}", (WIDTH * SQUARE_SIZE +  3.5 * SQUARE_SIZE, 3 * window_height / 4))
 
     min_y, min_x = 2 * SQUARE_SIZE, (WIDTH + 3) * SQUARE_SIZE
     pygame.draw.rect(s, COLORS[8], (min_x, min_y, 7 * SQUARE_SIZE, SQUARE_SIZE))
@@ -174,5 +174,29 @@ def drawBoard(s, b, player=None):
             if e > 0:
                 pygame.draw.rect(s, COLORS[e], (min_x + (x + 2) * SQUARE_SIZE, min_y + (y + 2) * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
     pygame.display.update()
-            
 
+
+def displayButton(s, text, rect, bc, fc, action=None):
+    center_x, center_y, width, height = rect
+    pygame.draw.rect(s, bc, (center_x - width / 2, center_y - height / 2, width, height))
+    displayText(s, text, (center_x, center_y), color=fc, center=True)
+
+    mouse = pygame.mouse.get_pos()
+    click = pygame.mouse.get_pressed()
+
+    if center_x + width / 2 > mouse[0] > center_x - width / 2 and center_y + height / 2 > mouse[1] > center_y - height / 2:
+        if click[0] == 1 and action != None:
+            action()
+         
+
+def drawMenu(s, prev_score, play_button_action=None):
+    """ Fuck off """
+    pygame.draw.rect(s, COLORS[0], (0, 0, window_width, window_height))
+    displayText(s, "Tetris", (window_width / 2, window_height / 10), center=True)
+
+    if prev_score:
+        displayText(s, prev_score, (window_width / 2, window_height / 2), center=True)
+
+    displayButton(s, "PLAY!", (window_width / 2, window_height * 0.80, 120, 50), (255,255,255), (0, 0, 0), play_button_action)
+
+    pygame.display.update()

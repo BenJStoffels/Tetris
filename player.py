@@ -30,7 +30,7 @@ class Player:
 
     def calcDelay(self, lines):
         y = self.y + self.shape.shape[0]
-        delay = 2 * ((21 - y) // 4) + 100
+        delay = 2 * ((21 - y) // 4) + 10
         if lines:
             delay += 20
         return delay

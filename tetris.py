@@ -63,11 +63,12 @@ def mainGame(level):
 def menu():
     quit_bool = False
     button_clicked = False
+    current_level = 15
     prev_score = ""
     while not quit_bool:
         if button_clicked:
             button_clicked = False
-            score, lines, level = mainGame(15)
+            score, lines, level = mainGame(current_level)
 
             prev_score = f"Game over!\nYour score was {score},\nYou cleared {lines} lines and\ngot to level {level},\nwell played!!"
 
@@ -79,7 +80,15 @@ def menu():
             nonlocal button_clicked
             button_clicked = True
 
-        drawMenu(screen, prev_score, action)
+        def level_action(level, unit=False):
+            nonlocal current_level
+            if not unit:
+                current_level = level + current_level % 10
+            else:
+                current_level = (current_level // 10) * 10 + level
+
+        drawMenu(screen, prev_score, current_level,
+                 action, level_select_action=level_action)
 
 
 menu()

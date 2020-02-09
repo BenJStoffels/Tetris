@@ -57,7 +57,7 @@ def mainGame(level):
 
         clock.tick(60)
 
-    return player.score, player.lines, player.level
+    return player.score, player.lines, player.level, player.tetrisCounter
 
 
 def menu():
@@ -68,7 +68,7 @@ def menu():
     while not quit_bool:
         if button_clicked:
             button_clicked = False
-            score, lines, level = mainGame(current_level)
+            score, lines, level, _ = mainGame(current_level)
 
             prev_score = f"Game over!\nYour score was {score},\nYou cleared {lines} lines and\ngot to level {level},\nwell played!!"
 

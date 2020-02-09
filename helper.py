@@ -176,7 +176,7 @@ def drawBoard(s, b, player=None):
     if not player:
         return
 
-    displayText(s, f"Score:\n{player.score:09}\nLines:\n{player.lines:03}\nLevel:\n{player.level:02}", (
+    displayText(s, f"Score:\n{player.score:09}\nLines: {player.lines:03}\nLevel: {player.level:02}\nSPL: {player.ScorePerLine:05.5}\nTetris: {player.tetrisCounter:02}", (
         WIDTH * SQUARE_SIZE + 3.5 * SQUARE_SIZE, 3 * window_height / 4))
 
     min_y, min_x = 2 * SQUARE_SIZE, (WIDTH + 3) * SQUARE_SIZE

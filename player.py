@@ -3,6 +3,7 @@ from helper import SHAPES, das, drop, pause, clearLines, createBlockdropAnimatio
 from init import HEIGHT, WIDTH
 import numpy as np
 
+
 class Player:
     def __init__(self, b, level):
         self.x = 4
@@ -14,7 +15,9 @@ class Player:
         self.level = level
         self.lines = 0
         self.score = 0
-        self.linesUntilNextLevel = min((level + 1) * 10, max(100, level * 10 - 50))
+        self.tetrisCounter = 0
+        self.linesUntilNextLevel = min(
+            (level + 1) * 10, max(100, level * 10 - 50))
         self.pause_ftie = None
         self.das = das(16, 6)
         self.drop_ftie = drop(self.dropRate, True)
@@ -49,7 +52,7 @@ class Player:
                 continue
             if y < 0:
                 continue
-            
+
             for x in range(min_x, min_x+off_x):
                 if x >= WIDTH:
                     if self.shape[:, x-min_x].max() > 0:
@@ -79,21 +82,24 @@ class Player:
                 self.x -= d
 
     def next(self, b):
-        
+
         if self.drop_ftie():
             self.drop(b)
 
-
     # Nieuwe blok en terug naar boven
+
     def reset(self, b):
         self.burn(b)
         huidige_lines = clearLines(b)
+        if huidige_lines == 4:
+            self.tetrisCounter += 1
         self.lines += huidige_lines
         self.linesUntilNextLevel -= huidige_lines
         self.score += self.calcScore(huidige_lines)
         self.pause_ftie = pause(self.calcDelay(huidige_lines != 0))
 
-        self.animations.append(createBlockdropAnimation({"x": self.x, "y": self.y, "shape": self.shape.copy()}))
+        self.animations.append(createBlockdropAnimation(
+            {"x": self.x, "y": self.y, "shape": self.shape.copy()}))
 
         if self.linesUntilNextLevel <= 0:
             self.level += 1
@@ -116,8 +122,8 @@ class Player:
         if self.collides(b):
             self.shape = np.rot90(self.shape, (d + 2) % 4)
 
-
     # Om te zien waar de blok is een hoe breed/hoog
+
     @property
     def rect(self):
         y_min, x_min = self.y, self.x
@@ -132,10 +138,23 @@ class Player:
 
     @property
     def dropRate(self):
-        return [48, 43, 38, 33, 28, 23, 18, 13, 8, 6, 5, 5, 5, 4, 4, 4, 3, 3, 3, 2, 2, 2, 2,2,2,2,2,2,2,1][self.level % 30]
+        return [48, 43, 38, 33, 28, 23, 18, 13, 8, 6, 5, 5, 5, 4, 4, 4, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1][self.level % 30]
 
     # Niet belangrijk
     @dropRate.setter
     def set_dropRate(self, val):
         raise PermissionError(
             "You can't set the dropRate attr, you should change the level instead!")
+
+    @property
+    def ScorePerLine(self):
+        try:
+            return self.score / self.lines
+        except ZeroDivisionError:
+            return 0.0
+
+    # Niet belangrijk
+    @ScorePerLine.setter
+    def set_spl(self, val):
+        raise PermissionError(
+            "You can't set the ScorePerLine attr")

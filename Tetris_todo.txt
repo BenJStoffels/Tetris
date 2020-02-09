@@ -1,9 +1,7 @@
 ﻿Todo Tetris:
-* Menu maken
--level selecteren
--na game over terug naar menu (ipv afsluiten)
+* Menu bewerken
 -Highscores ??? (opslaan in apart bestand, kan Yarno zijn scores bij mij toevoegen? server?)
 * Harddrop (SPACE)
 * Lineclear animation (delay is ok)
-* Playerdrop animation (delay is ok)
+* Game Over animation
 * ...

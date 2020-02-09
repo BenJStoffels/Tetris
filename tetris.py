@@ -2,7 +2,8 @@ import pygame
 import numpy as np  # for 2D fields
 from player import Player
 from helper import das, drawBoard, drawMenu
-from init import screen, clock, field
+from init import screen, clock, field, high_scores
+import json
 
 
 def mainGame(level):
@@ -68,7 +69,26 @@ def menu():
     while not quit_bool:
         if button_clicked:
             button_clicked = False
-            score, lines, level, _ = mainGame(current_level)
+            score, lines, level, tetrisCount = mainGame(current_level)
+
+            if score > high_scores[-1]["score"]:
+                Score_Obj = {
+                    "Name": "Ben",
+                    "score": score,
+                    "lines": lines,
+                    "level": level,
+                    "tetrisCount": tetrisCount
+                }
+
+                i = len(high_scores) - 1
+                while score > high_scores[i]["score"]:
+                    i -= 1
+                i += 1
+                high_scores.insert(i, Score_Obj)
+                high_scores.pop()
+
+                with open("high_scores.json", "w") as JSONFile:
+                    json.dump(high_scores, JSONFile, indent=True)
 
             prev_score = f"Game over!\nYour score was {score},\nYou cleared {lines} lines and\ngot to level {level},\nwell played!!"
 

@@ -1,5 +1,9 @@
 import pygame
 import numpy as np
+import json
+
+with open("high_scores.json", "r") as JSONFile:
+    high_scores = json.load(JSONFile)
 
 # Grootte van het bord
 field = HEIGHT, WIDTH = (20, 10)

@@ -50,12 +50,15 @@ COLORS = [
 ]
 
 
-def createBlockdropAnimation(player):
+def createBlockdropAnimation(player, time):
     counter = 0
     white = False
 
     def inner(s):
         nonlocal counter, white
+        if counter > time:
+            return True
+
         if counter % 4 == 0:
             white = not white
 
@@ -67,6 +70,38 @@ def createBlockdropAnimation(player):
                         player["x"] + x + 1) * SQUARE_SIZE, (player["y"] + y) * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
 
         pygame.display.update()
+        counter += 1
+        return False
+
+    return inner
+
+
+def createLineClearAnimation(lines, delay):
+    counter = 0
+    frameCounter = 0
+    frames = [1, 3, 5, 7, 9, 11, 13]
+
+    def inner(s):
+        nonlocal counter, frameCounter
+        if counter > 20 + delay:
+            return True
+        if counter < delay:
+            counter += 1
+            return False
+        if (counter - delay) % 4 == 0:
+            frameCounter += 1
+
+        for y, l in lines.items():
+            pygame.draw.rect(
+                s, COLORS[0], (SQUARE_SIZE, y * SQUARE_SIZE, WIDTH * SQUARE_SIZE, SQUARE_SIZE))
+            for x, e in enumerate(l):
+                if x + frames[frameCounter] > WIDTH:
+                    continue
+                pygame.draw.rect(s, COLORS[e], ((
+                    x + frames[frameCounter]) * SQUARE_SIZE, y * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
+
+        pygame.display.update()
+
         counter += 1
 
     return inner
@@ -126,16 +161,18 @@ def pause(delay):
 
 def clearLines(b):
     lineCount = 0
+    lines = {}
     for y, l in enumerate(b):
         if l.min() != 0:
             lineCount += 1
+            lines[y] = l.copy()
             y_up = y
             while y_up > 0:
                 b[y_up, :] = b[y_up - 1].copy()
                 y_up -= 1
             b[0, :] = [0] * WIDTH
 
-    return lineCount
+    return lineCount, lines
 
 
 def displayText(s, string_text, pos, color=(255, 255, 255), center=False):

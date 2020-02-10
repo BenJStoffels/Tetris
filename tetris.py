@@ -14,7 +14,8 @@ def mainGame(level):
 
     while not game_over:  # oneindige loop
         for animation in player.animations:
-            animation(screen)
+            if animation(screen):
+                player.animations.pop()
 
         if player.pause_ftie == None:
             player.animations.clear()

@@ -1,5 +1,5 @@
 import random
-from helper import SHAPES, das, drop, pause, clearLines, createBlockdropAnimation
+from helper import SHAPES, das, drop, pause, clearLines, createBlockdropAnimation, createLineClearAnimation
 from init import HEIGHT, WIDTH
 import numpy as np
 
@@ -90,16 +90,19 @@ class Player:
 
     def reset(self, b):
         self.burn(b)
-        huidige_lines = clearLines(b)
+        huidige_lines, lines = clearLines(b)
         if huidige_lines == 4:
             self.tetrisCounter += 1
         self.lines += huidige_lines
         self.linesUntilNextLevel -= huidige_lines
         self.score += self.calcScore(huidige_lines)
-        self.pause_ftie = pause(self.calcDelay(huidige_lines != 0))
+        delay = self.calcDelay(huidige_lines != 0)
+        self.pause_ftie = pause(delay)
+        if huidige_lines != 0:
+            self.animations.append(createLineClearAnimation(lines, delay - 20))
 
         self.animations.append(createBlockdropAnimation(
-            {"x": self.x, "y": self.y, "shape": self.shape.copy()}))
+            {"x": self.x, "y": self.y, "shape": self.shape.copy()}, time=self.calcDelay(False)))
 
         if self.linesUntilNextLevel <= 0:
             self.level += 1

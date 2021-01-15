@@ -159,6 +159,22 @@ def pause(delay):
     return inner
 
 
+def pause_game(s, quit_action=None):
+    play = False
+
+    def play_on():
+        nonlocal play
+        play = True
+
+    def inner():
+        nonlocal play
+        drawPauseMenu(s, play_on, quit_action)
+        return play
+
+    return inner
+
+
+
 def clearLines(b):
     lineCount = 0
     lines = {}
@@ -187,7 +203,21 @@ def displayText(s, string_text, pos, color=(255, 255, 255), center=False):
         y_current += lineHeight
 
 
-def drawBoard(s, b, player=None):
+def displayButton(s, text, rect, bc, fc, action=None, *args, **kwargs):
+    center_x, center_y, width, height = rect
+    pygame.draw.rect(s, bc, (center_x - width / 2,
+                             center_y - height / 2, width, height))
+    displayText(s, text, (center_x, center_y), color=fc, center=True)
+
+    mouse = pygame.mouse.get_pos()
+    click = pygame.mouse.get_pressed()
+
+    if center_x + width / 2 > mouse[0] > center_x - width / 2 and center_y + height / 2 > mouse[1] > center_y - height / 2:
+        if click[0] == 1 and action != None:
+            action(*args, **kwargs)
+
+
+def drawBoard(s, b, player=None, quit_action=None):
     # draw the current playing-field
     print_b = b.copy()  # b is het bord zonder de huidige blok
     if player:
@@ -216,6 +246,11 @@ def drawBoard(s, b, player=None):
     displayText(s, f"Score:\n{player.score:09}\nLines: {player.lines:03}\nLevel: {player.level:02}\nSPL: {player.ScorePerLine:05.5}\nTetris: {player.tetrisCounter:02}", (
         WIDTH * SQUARE_SIZE + 3.5 * SQUARE_SIZE, 3 * window_height / 4))
 
+    def pause_func():
+        player.pause_ftie = pause_game(s, quit_action)
+
+    displayButton(s, "Pause", (WIDTH * SQUARE_SIZE + 6.5 * SQUARE_SIZE, window_height * 0.95, 120, window_height * 0.07), (255, 255, 255), (0, 0, 0), pause_func)
+
     min_y, min_x = 2 * SQUARE_SIZE, (WIDTH + 3) * SQUARE_SIZE
     pygame.draw.rect(s, COLORS[8], (min_x, min_y,
                                     7 * SQUARE_SIZE, SQUARE_SIZE))
@@ -231,20 +266,6 @@ def drawBoard(s, b, player=None):
                 pygame.draw.rect(s, COLORS[e], (min_x + (x + 2) * SQUARE_SIZE,
                                                 min_y + (y + 2) * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
     pygame.display.update()
-
-
-def displayButton(s, text, rect, bc, fc, action=None, *args, **kwargs):
-    center_x, center_y, width, height = rect
-    pygame.draw.rect(s, bc, (center_x - width / 2,
-                             center_y - height / 2, width, height))
-    displayText(s, text, (center_x, center_y), color=fc, center=True)
-
-    mouse = pygame.mouse.get_pos()
-    click = pygame.mouse.get_pressed()
-
-    if center_x + width / 2 > mouse[0] > center_x - width / 2 and center_y + height / 2 > mouse[1] > center_y - height / 2:
-        if click[0] == 1 and action != None:
-            action(*args, **kwargs)
 
 
 def drawMenu(s, prev_score, current_level, play_button_action=None, level_select_action=None):
@@ -284,5 +305,18 @@ def drawMenu(s, prev_score, current_level, play_button_action=None, level_select
                       (252, 209, 42) if (current_level %
                                          10) == i else (255, 255, 255),
                       (0, 0, 0), level_select_action, i, unit=True)
+
+    pygame.display.update()
+
+
+def drawPauseMenu(s, play_button_action=None, quit_button_action=None):
+    pygame.draw.rect(s, (255, 255, 255), (0, window_height / 4, window_width, window_height / 2))
+
+    displayText(s, "Paused!\nCome on, You're doing great!", (window_width / 2,
+                              window_height / 4 + 60), color=(0, 0, 0), center=True)
+
+    displayButton(s, "PLAY!", (window_width / 2 - 80, window_height / 2 + 60, 120, 50), (0, 0, 0), (255, 255, 255), play_button_action)
+
+    displayButton(s, "QUIT", (window_width / 2 + 80, window_height / 2 + 60, 120, 50), (0, 0, 0), (255, 255, 255), quit_button_action)
 
     pygame.display.update()

@@ -42,7 +42,11 @@ def mainGame(level):
                 except StopIteration:
                     game_over = True
 
-            drawBoard(screen, board, player)
+            def quit_action():
+                nonlocal game_over
+                game_over = True
+
+            drawBoard(screen, board, player, quit_action)
 
             try:
                 player.next(board)
@@ -80,14 +84,18 @@ def menu():
                     "level": level,
                     "tetrisCount": tetrisCount
                 }
+                if score > high_scores[0]["score"]:
+                    high_scores.insert(0, Score_Obj)
+                    high_scores.pop()
+                else:
+                    i = len(high_scores) - 1
+                    while score > high_scores[i]["score"]:
+                        i -= 1
+                    i += 1
+                    high_scores.insert(i, Score_Obj)
+                    high_scores.pop()
 
-                i = len(high_scores) - 1
-                while score > high_scores[i]["score"]:
-                    i -= 1
-                i += 1
-                high_scores.insert(i, Score_Obj)
-                high_scores.pop()
-
+                print("you got in the top 5")
                 with open("high_scores.json", "w") as JSONFile:
                     json.dump(high_scores, JSONFile, indent=True)
 
@@ -111,6 +119,6 @@ def menu():
         drawMenu(screen, prev_score, current_level,
                  action, level_select_action=level_action)
 
-
-menu()
-pygame.quit()  # pylint: disable=no-member
+if __name__ == "__main__":
+    menu()
+    pygame.quit()  # pylint: disable=no-member

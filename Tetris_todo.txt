@@ -1,7 +1,5 @@
 ﻿Todo Tetris:
-* Menu bewerken
--Highscores ??? (opslaan in apart bestand, kan Yarno zijn scores bij mij toevoegen? server?)
+* Pause menu bewerken
 * Harddrop (SPACE)
-* Lineclear animation (delay is ok)
 * Game Over animation
 * ...

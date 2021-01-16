@@ -99,7 +99,7 @@ def menu():
                 with open("high_scores.json", "w") as JSONFile:
                     json.dump(high_scores, JSONFile, indent=True)
 
-            prev_score = f"Game over!\nYour score was {score},\nYou cleared {lines} lines and\ngot to level {level},\nwell played!!"
+            prev_score = f"Game over!\nYour score was {score},\nYou cleared {lines} lines\nwith {tetrisCount} tetrises and\ngot to level {level},\nwell played!!"
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:  # pylint: disable=E1101

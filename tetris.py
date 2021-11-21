@@ -6,10 +6,12 @@ from init import screen, clock, field, high_scores
 import json
 
 
-def mainGame(level):
+def mainGame(level, seed=None):
+    if seed == None:
+        seed = 10  # generate random seed
     # Maakt een 2d lijst gevuld met 0
     board = np.zeros(field, dtype=int)
-    player = Player(board, level)  # we maken een speler
+    player = Player(board, level, seed)  # we maken een speler
     game_over = False
 
     while not game_over:  # oneindige loop
@@ -28,13 +30,15 @@ def mainGame(level):
                     if event.key == 100:  # D
                         player.rotate(1, board)
                     if event.key == 276 or event.key == 275:
-                        player.das = das(16, 6)
+                        player.resetDas()
 
             keys_pressed = pygame.key.get_pressed()
-            if keys_pressed[276]:
-                player.move(-1, board)
-            if keys_pressed[275]:
-                player.move(1, board)
+            if not (keys_pressed[276] and keys_pressed[275]):
+                if keys_pressed[276]:
+                    player.move(-1, board)
+                if keys_pressed[275]:
+                    player.move(1, board)
+
             if keys_pressed[274]:
                 try:
                     if player.drop_ftie(2):
@@ -118,6 +122,7 @@ def menu():
 
         drawMenu(screen, prev_score, current_level,
                  action, level_select_action=level_action)
+
 
 if __name__ == "__main__":
     menu()

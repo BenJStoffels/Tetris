@@ -5,9 +5,10 @@ import numpy as np
 
 
 class Player:
-    def __init__(self, b, level):
+    def __init__(self, b, level, seed=10):
         self.x = 4
         self.y = 0
+        random.seed(seed)
         self.nextShape = random.choice(SHAPES).copy()
         self.shape = random.choice(SHAPES).copy()
         while self.shape[-self.y, :].max() == 0:
@@ -19,7 +20,7 @@ class Player:
         self.linesUntilNextLevel = min(
             (level + 1) * 10, max(100, level * 10 - 50))
         self.pause_ftie = None
-        self.das = das(16, 6)
+        self.resetDas()
         self.drop_ftie = drop(self.dropRate, True)
         self.animations = []
 
@@ -119,6 +120,9 @@ class Player:
             # Wanneer de nieuwe blok meteen iets raakt, is het spel gedaan,
             # raise zorgt ervoor dat er een Error komt (zie later)
             raise StopIteration
+
+    def resetDas(self):
+        self.das = das(16, 6)
 
     def rotate(self, d, b):
         self.shape = np.rot90(self.shape, d % 4)

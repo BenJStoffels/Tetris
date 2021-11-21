@@ -1,6 +1,13 @@
 [
  {
   "Name": "Ben",
+  "score": 314680,
+  "lines": 106,
+  "level": 16,
+  "tetrisCount": 14
+ },
+ {
+  "Name": "Ben",
   "score": 237440,
   "lines": 78,
   "level": 15,
@@ -26,12 +33,5 @@
   "lines": 110,
   "level": 17,
   "tetrisCount": 8
- },
- {
-  "name": "Yarno",
-  "score": 210960,
-  "lines": 102,
-  "level": 16,
-  "tetrisCount": null
  }
 ]

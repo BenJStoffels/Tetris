@@ -118,7 +118,7 @@ def das(delay, speed):
             charged = True
             return
 
-        if counter == 16:
+        if counter == delay:
             counter = [0, delay-speed][charged]
             charged = True
             return True
@@ -172,7 +172,6 @@ def pause_game(s, quit_action=None):
         return play
 
     return inner
-
 
 
 def clearLines(b):
@@ -249,7 +248,8 @@ def drawBoard(s, b, player=None, quit_action=None):
     def pause_func():
         player.pause_ftie = pause_game(s, quit_action)
 
-    displayButton(s, "Pause", (WIDTH * SQUARE_SIZE + 6.5 * SQUARE_SIZE, window_height * 0.95, 120, window_height * 0.07), (255, 255, 255), (0, 0, 0), pause_func)
+    displayButton(s, "Pause", (WIDTH * SQUARE_SIZE + 6.5 * SQUARE_SIZE, window_height *
+                               0.95, 120, window_height * 0.07), (255, 255, 255), (0, 0, 0), pause_func)
 
     min_y, min_x = 2 * SQUARE_SIZE, (WIDTH + 3) * SQUARE_SIZE
     pygame.draw.rect(s, COLORS[8], (min_x, min_y,
@@ -310,13 +310,16 @@ def drawMenu(s, prev_score, current_level, play_button_action=None, level_select
 
 
 def drawPauseMenu(s, play_button_action=None, quit_button_action=None):
-    pygame.draw.rect(s, (255, 255, 255), (0, window_height / 4, window_width, window_height / 2))
+    pygame.draw.rect(s, (255, 255, 255), (0, window_height /
+                                          4, window_width, window_height / 2))
 
     displayText(s, "Paused!\nCome on, You're doing great!", (window_width / 2,
-                              window_height / 4 + 60), color=(0, 0, 0), center=True)
+                                                             window_height / 4 + 60), color=(0, 0, 0), center=True)
 
-    displayButton(s, "PLAY!", (window_width / 2 - 80, window_height / 2 + 60, 120, 50), (0, 0, 0), (255, 255, 255), play_button_action)
+    displayButton(s, "PLAY!", (window_width / 2 - 80, window_height /
+                               2 + 60, 120, 50), (0, 0, 0), (255, 255, 255), play_button_action)
 
-    displayButton(s, "QUIT", (window_width / 2 + 80, window_height / 2 + 60, 120, 50), (0, 0, 0), (255, 255, 255), quit_button_action)
+    displayButton(s, "QUIT", (window_width / 2 + 80, window_height /
+                              2 + 60, 120, 50), (0, 0, 0), (255, 255, 255), quit_button_action)
 
     pygame.display.update()
